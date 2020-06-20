@@ -47,5 +47,46 @@ namespace Vivelin.Hosts.Tests
 
             entry.Comment.Should().Be(Comment);
         }
+
+        [Fact]
+        public void IPv4AddressesAreParsed()
+        {
+            var entry = new HostsFileEntry { Line = "127.0.0.1" };
+
+            entry.Address.Should().Be(new System.Net.IPAddress(new byte[] { 127, 0, 0, 1 }));
+        }
+
+        [Fact]
+        public void ExtraIPv4AddressesAreIgnored()
+        {
+            var entry = new HostsFileEntry { Line = "127.0.0.1 # 127.0.0.2 127.0.0.3" };
+
+            entry.Address.Should().Be(new System.Net.IPAddress(new byte[] { 127, 0, 0, 1 }));
+        }
+
+        [Fact]
+        public void FirstIPAddressInCommentIsParsed()
+        {
+            var entry = new HostsFileEntry { Line = "# 127.0.0.1" };
+
+            entry.Address.Should().Be(new System.Net.IPAddress(new byte[] { 127, 0, 0, 1 }));
+        }
+
+        [Fact]
+        public void FirstIPAddressInCommentWithoutSpaceIsParsed()
+        {
+            var entry = new HostsFileEntry { Line = "#127.0.0.1" };
+
+            entry.Address.Should().Be(new System.Net.IPAddress(new byte[] { 127, 0, 0, 1 }));
+        }
+
+        [Fact]
+        public void CommentIsParsedWhenFirstTokenIsIPAddress()
+        {
+            var entry = new HostsFileEntry { Line = "# 127.0.0.1 # Comment" };
+
+            entry.Address.Should().Be(new System.Net.IPAddress(new byte[] { 127, 0, 0, 1 }));
+            entry.Comment.Should().Be("Comment");
+        }
     }
 }
