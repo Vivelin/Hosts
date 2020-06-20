@@ -3,45 +3,58 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
+using System.Text;
 
 namespace Vivelin.Hosts
 {
     public class HostsFileEntry
     {
-        private string _comment;
-        private IPAddress _address;
-        private readonly List<string> _hostNames = new List<string>();
-        private bool _enabled;
-
         private HostsFileEntry(string line, string comment, IPAddress address, List<string> hostNames, bool enabled)
         {
             Line = line;
-            _comment = comment;
-            _address = address;
-            _hostNames = hostNames;
-            _enabled = enabled;
+            Comment = comment;
+            Address = address;
+            HostNames = hostNames;
+            Enabled = enabled;
         }
 
         public string Line { get; }
 
-        public IPAddress Address
-        {
-            get { return _address; }
-        }
+        public IPAddress Address { get; set; }
 
-        public ReadOnlyCollection<string> HostNames
-        {
-            get { return _hostNames.AsReadOnly(); }
-        }
+        public List<string> HostNames { get; }
+            = new List<string>();
 
-        public string Comment
-        {
-            get { return _comment; }
-        }
+        public string Comment { get; set; }
 
-        public bool Enabled
+        public bool Enabled { get; set; }
+
+        public bool IsValid => Address != null && HostNames.Count > 0;
+
+        public override string ToString()
         {
-            get { return _enabled; }
+            var builder = new StringBuilder();
+            if (!Enabled && IsValid)
+            {
+                builder.Append("# ");
+            }
+
+            if (Address != null)
+            {
+                builder.Append(Address.ToString());
+                builder.Append(' ');
+                builder.Append(string.Join(' ', HostNames));
+            }
+
+            if (Comment != null)
+            {
+                if (Address != null)
+                    builder.Append(' ');
+                builder.Append("# ");
+                builder.Append(Comment);
+            }
+
+            return builder.ToString().Trim();
         }
 
         public static HostsFileEntry Parse(string value)

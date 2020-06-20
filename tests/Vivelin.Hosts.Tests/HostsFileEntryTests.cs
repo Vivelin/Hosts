@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 
 using FluentAssertions;
 
@@ -113,6 +114,76 @@ namespace Vivelin.Hosts.Tests
 
             entry.Enabled.Should().BeFalse();
             entry.HostNames.Should().Equal("localhost", "loopback");
+        }
+
+        [Fact]
+        public void DisablingAValidEntryShouldAddNumberSignAndASpace()
+        {
+            var entry = HostsFileEntry.Parse("127.0.0.1 localhost loopback # Comment");
+
+            entry.Enabled = false;
+
+            entry.ToString().Should().Be("# 127.0.0.1 localhost loopback # Comment");
+        }
+
+        [Fact]
+        public void DisablingAnInvalidLineShouldLeaveEverythingAsIs()
+        {
+            var entry = HostsFileEntry.Parse("# Comment");
+
+            entry.Enabled = false;
+
+            entry.ToString().Should().Be("# Comment");
+        }
+
+        [Fact]
+        public void CommentCanBeChanged()
+        {
+            var entry = HostsFileEntry.Parse("127.0.0.1 localhost loopback # Comment");
+
+            entry.Comment = "asdfasdf";
+
+            entry.ToString().Should().Be("127.0.0.1 localhost loopback # asdfasdf");
+        }
+
+        [Fact]
+        public void CommentCanBeRemoved()
+        {
+            var entry = HostsFileEntry.Parse("127.0.0.1 localhost loopback # Comment");
+
+            entry.Comment = null;
+
+            entry.ToString().Should().Be("127.0.0.1 localhost loopback");
+        }
+
+        [Fact]
+        public void EmptyCommentIsTrimmed()
+        {
+            var entry = HostsFileEntry.Parse("127.0.0.1 localhost loopback # Comment");
+
+            entry.Comment = "";
+
+            entry.ToString().Should().Be("127.0.0.1 localhost loopback #");
+        }
+
+        [Fact]
+        public void HostNamesAreAddedInOrder()
+        {
+            var entry = HostsFileEntry.Parse("127.0.0.1 localhost # Comment");
+
+            entry.HostNames.Add("loopback");
+
+            entry.ToString().Should().Be("127.0.0.1 localhost loopback # Comment");
+        }
+
+        [Fact]
+        public void ChangingIPAddressShouldGiveANewLine()
+        {
+            var entry = HostsFileEntry.Parse("127.0.0.1 localhost loopback # Comment");
+
+            entry.Address = IPAddress.Parse("127.0.0.2");
+
+            entry.ToString().Should().Be("127.0.0.2 localhost loopback # Comment");
         }
     }
 }
