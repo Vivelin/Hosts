@@ -13,7 +13,7 @@ namespace Vivelin.Hosts.Tests
         {
             const string Line = "# This is a sample HOSTS file used by Microsoft TCP/IP for Windows.";
 
-            var entry = new HostsFileEntry { Line = Line };
+            var entry = HostsFileEntry.Parse(Line);
 
             entry.Line.Should().Be(Line);
         }
@@ -23,7 +23,7 @@ namespace Vivelin.Hosts.Tests
         {
             const string Comment = "This is a sample HOSTS file used by Microsoft TCP/IP for Windows.";
 
-            var entry = new HostsFileEntry { Line = $"# {Comment}" };
+            var entry = HostsFileEntry.Parse($"# {Comment}");
 
             entry.Comment.Should().Be(Comment);
         }
@@ -33,7 +33,7 @@ namespace Vivelin.Hosts.Tests
         {
             const string Comment = "This is a sample HOSTS # file # used by # Microsoft TCP/IP for Windows.";
 
-            var entry = new HostsFileEntry { Line = $"test test test # {Comment}" };
+            var entry = HostsFileEntry.Parse($"test test test # {Comment}");
 
             entry.Comment.Should().Be(Comment);
         }
@@ -43,7 +43,7 @@ namespace Vivelin.Hosts.Tests
         {
             const string Comment = "This is a sample HOSTS file used by Microsoft TCP/IP for Windows.";
 
-            var entry = new HostsFileEntry { Line = $"#{Comment}" };
+            var entry = HostsFileEntry.Parse($"#{Comment}");
 
             entry.Comment.Should().Be(Comment);
         }
@@ -51,7 +51,7 @@ namespace Vivelin.Hosts.Tests
         [Fact]
         public void IPv4AddressesAreParsed()
         {
-            var entry = new HostsFileEntry { Line = "127.0.0.1" };
+            var entry = HostsFileEntry.Parse("127.0.0.1");
 
             entry.Address.Should().Be(new System.Net.IPAddress(new byte[] { 127, 0, 0, 1 }));
         }
@@ -59,7 +59,7 @@ namespace Vivelin.Hosts.Tests
         [Fact]
         public void ExtraIPv4AddressesAreIgnored()
         {
-            var entry = new HostsFileEntry { Line = "127.0.0.1 # 127.0.0.2 127.0.0.3" };
+            var entry = HostsFileEntry.Parse("127.0.0.1 # 127.0.0.2 127.0.0.3");
 
             entry.Address.Should().Be(new System.Net.IPAddress(new byte[] { 127, 0, 0, 1 }));
         }
@@ -67,7 +67,7 @@ namespace Vivelin.Hosts.Tests
         [Fact]
         public void FirstIPAddressInCommentIsParsed()
         {
-            var entry = new HostsFileEntry { Line = "# 127.0.0.1" };
+            var entry = HostsFileEntry.Parse("# 127.0.0.1");
 
             entry.Address.Should().Be(new System.Net.IPAddress(new byte[] { 127, 0, 0, 1 }));
         }
@@ -75,7 +75,7 @@ namespace Vivelin.Hosts.Tests
         [Fact]
         public void FirstIPAddressInCommentWithoutSpaceIsParsed()
         {
-            var entry = new HostsFileEntry { Line = "#127.0.0.1" };
+            var entry = HostsFileEntry.Parse("#127.0.0.1");
 
             entry.Address.Should().Be(new System.Net.IPAddress(new byte[] { 127, 0, 0, 1 }));
         }
@@ -83,7 +83,7 @@ namespace Vivelin.Hosts.Tests
         [Fact]
         public void CommentIsParsedWhenFirstTokenIsIPAddress()
         {
-            var entry = new HostsFileEntry { Line = "# 127.0.0.1 # Comment" };
+            var entry = HostsFileEntry.Parse("# 127.0.0.1 # Comment");
 
             entry.Address.Should().Be(new System.Net.IPAddress(new byte[] { 127, 0, 0, 1 }));
             entry.Comment.Should().Be("Comment");
@@ -92,7 +92,7 @@ namespace Vivelin.Hosts.Tests
         [Fact]
         public void TokensOutsideOfCommentAreParsedAsHostNames()
         {
-            var entry = new HostsFileEntry { Line = "127.0.0.1 localhost loopback # Comment" };
+            var entry = HostsFileEntry.Parse("127.0.0.1 localhost loopback # Comment");
 
             entry.HostNames.Should().Equal("localhost", "loopback");
         }
@@ -100,7 +100,7 @@ namespace Vivelin.Hosts.Tests
         [Fact]
         public void TokensInOuterCommentAreParsedAsHostNames()
         {
-            var entry = new HostsFileEntry { Line = "# 127.0.0.1 localhost loopback # Comment" };
+            var entry = HostsFileEntry.Parse("# 127.0.0.1 localhost loopback # Comment");
 
             entry.Enabled.Should().BeFalse();
             entry.HostNames.Should().Equal("localhost", "loopback");
@@ -109,7 +109,7 @@ namespace Vivelin.Hosts.Tests
         [Fact]
         public void TokensInOuterCommentWithoutSpaceAreParsedAsHostNames()
         {
-            var entry = new HostsFileEntry { Line = "#127.0.0.1 localhost loopback # Comment" };
+            var entry = HostsFileEntry.Parse("#127.0.0.1 localhost loopback # Comment");
 
             entry.Enabled.Should().BeFalse();
             entry.HostNames.Should().Equal("localhost", "loopback");
