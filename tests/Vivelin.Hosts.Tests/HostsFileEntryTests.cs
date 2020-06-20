@@ -88,5 +88,22 @@ namespace Vivelin.Hosts.Tests
             entry.Address.Should().Be(new System.Net.IPAddress(new byte[] { 127, 0, 0, 1 }));
             entry.Comment.Should().Be("Comment");
         }
+
+        [Fact]
+        public void TokensOutsideOfCommentAreParsedAsHostNames()
+        {
+            var entry = new HostsFileEntry { Line = "127.0.0.1 localhost loopback # Comment" };
+
+            entry.HostNames.Should().Equal("localhost", "loopback");
+        }
+
+        [Fact]
+        public void TokensInOuterCommentAreParsedAsHostNames()
+        {
+            var entry = new HostsFileEntry { Line = "# 127.0.0.1 localhost loopback # Comment" };
+
+            entry.Enabled.Should().BeFalse();
+            entry.HostNames.Should().Equal("localhost", "loopback");
+        }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 
@@ -9,6 +11,8 @@ namespace Vivelin.Hosts
         private string _line;
         private string _comment;
         private IPAddress _address;
+        private List<string> _hostNames = new List<string>();
+        private bool _enabled;
 
         public string Line
         {
@@ -28,17 +32,28 @@ namespace Vivelin.Hosts
             get { return _address; }
         }
 
+        public ReadOnlyCollection<string> HostNames
+        {
+            get { return _hostNames.AsReadOnly(); }
+        }
+
         public string Comment
         {
             get { return _comment; }
         }
 
+        public bool Enabled
+        {
+            get { return _enabled; }
+        }
+
         private void Parse(string value)
         {
             var tokens = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            var inComment = false;
+            _enabled = true;
             _comment = null;
             _address = null;
+            _hostNames.Clear();
 
             for (var i = 0; i < tokens.Length; i++)
             {
@@ -46,23 +61,23 @@ namespace Vivelin.Hosts
                 if (token == "#")
                 {
                     _comment = string.Join(' ', tokens.Skip(i + 1));
-                    if (inComment || tokens.Length <= i || !IPAddress.TryParse(tokens[i + 1], out _))
+                    if (!_enabled || tokens.Length <= i || !IPAddress.TryParse(tokens[i + 1], out _))
                     {
                         break;
                     }
 
-                    inComment = true;
+                    _enabled = false;
                     _comment = null;
                 }
                 else if (token.StartsWith('#'))
                 {
                     _comment = token.Substring(1) + ' ' + string.Join(' ', tokens.Skip(i + 1));
-                    if (inComment || !IPAddress.TryParse(token.Substring(1), out var address))
+                    if (!_enabled || !IPAddress.TryParse(token.Substring(1), out var address))
                     {
                         break;
                     }
 
-                    inComment = true;
+                    _enabled = false;
                     _address = address;
                     _comment = null;
                 }
@@ -72,7 +87,7 @@ namespace Vivelin.Hosts
                 }
                 else
                 {
-
+                    _hostNames.Add(token);
                 }
             }
         }
