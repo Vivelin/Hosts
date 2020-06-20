@@ -34,7 +34,7 @@ namespace Vivelin.Hosts
         public override string ToString()
         {
             var builder = new StringBuilder();
-            if (!Enabled && IsValid)
+            if (!Enabled && (IsValid || Comment == null))
             {
                 builder.Append("# ");
             }

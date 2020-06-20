@@ -185,5 +185,21 @@ namespace Vivelin.Hosts.Tests
 
             entry.ToString().Should().Be("127.0.0.2 localhost loopback # Comment");
         }
+
+        [Fact]
+        public void EmptyLineStaysEmpty()
+        {
+            var entry = HostsFileEntry.Parse("");
+
+            entry.ToString().Should().Be("");
+        }
+
+        [Fact]
+        public void InvalidEntryShouldRemainInvalid()
+        {
+            var entry = HostsFileEntry.Parse("# 127.0.0.1");
+
+            entry.ToString().Should().Be("# 127.0.0.1");
+        }
     }
 }
