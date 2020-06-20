@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace Vivelin.Hosts
 {
@@ -6,6 +7,7 @@ namespace Vivelin.Hosts
     {
         private string _line;
         private bool _isEnabled;
+        private string _comment;
 
         public string Line
         {
@@ -20,19 +22,30 @@ namespace Vivelin.Hosts
             }
         }
 
-        public bool IsEnabled
+        public string Comment
         {
-            get { return _isEnabled; }
-            set { _isEnabled = value; }
+            get { return _comment; }
+            set { _comment = value; }
         }
 
-        private void Parse(ReadOnlySpan<char> value)
+        private void Parse(string value)
         {
-            var trimmed = value.Trim();
+            var tokens = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-            if (trimmed[0] == '#')
+            for (var i = 0; i < tokens.Length; i++)
             {
-                _isEnabled = false;
+                var token = tokens[i];
+                if (token.Trim() == "#")
+                {
+                    Comment = string.Join(' ', tokens.Skip(i + 1));
+                    break;
+                }
+
+                if (token.Trim().StartsWith('#'))
+                {
+                    Comment = token.Substring(1) + ' ' + string.Join(' ', tokens.Skip(i + 1));
+                    break;
+                }
             }
         }
     }

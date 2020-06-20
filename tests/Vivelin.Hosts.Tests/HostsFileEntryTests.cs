@@ -19,13 +19,33 @@ namespace Vivelin.Hosts.Tests
         }
 
         [Fact]
-        public void CommentIsMarkedAsDisabled()
+        public void FullLineCommentIsParsed()
         {
-            const string Line = "# This is a sample HOSTS file used by Microsoft TCP/IP for Windows.";
+            const string Comment = "This is a sample HOSTS file used by Microsoft TCP/IP for Windows.";
 
-            var entry = new HostsFileEntry { Line = Line };
+            var entry = new HostsFileEntry { Line = $"# {Comment}" };
 
-            entry.IsEnabled.Should().BeFalse();
+            entry.Comment.Should().Be(Comment);
+        }
+
+        [Fact]
+        public void CommentIsParsedFromTheFirstPosition()
+        {
+            const string Comment = "This is a sample HOSTS # file # used by # Microsoft TCP/IP for Windows.";
+
+            var entry = new HostsFileEntry { Line = $"test test test # {Comment}" };
+
+            entry.Comment.Should().Be(Comment);
+        }
+
+        [Fact]
+        public void CommentIsParsedWithoutLeadingSpace()
+        {
+            const string Comment = "This is a sample HOSTS file used by Microsoft TCP/IP for Windows.";
+
+            var entry = new HostsFileEntry { Line = $"#{Comment}" };
+
+            entry.Comment.Should().Be(Comment);
         }
     }
 }
