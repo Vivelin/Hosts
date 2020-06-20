@@ -63,6 +63,8 @@ namespace Vivelin.Hosts
                     _comment = string.Join(' ', tokens.Skip(i + 1));
                     if (!_enabled || tokens.Length <= i || !IPAddress.TryParse(tokens[i + 1], out _))
                     {
+                        // Stop parsing when we encounter a comment in an already commented-out line
+                        // Stop parsing when the next token is not an IP address (so a regular comment)
                         break;
                     }
 
@@ -74,6 +76,8 @@ namespace Vivelin.Hosts
                     _comment = token.Substring(1) + ' ' + string.Join(' ', tokens.Skip(i + 1));
                     if (!_enabled || !IPAddress.TryParse(token.Substring(1), out var address))
                     {
+                        // Stop parsing when we encounter a comment in an already commented-out line
+                        // Stop parsing when the commented token is an IP address (so a regular comment)
                         break;
                     }
 
@@ -83,10 +87,12 @@ namespace Vivelin.Hosts
                 }
                 else if (_address == null && IPAddress.TryParse(token, out var address))
                 {
+                    // IP addresses are easy to recognize, but we can only have one
                     _address = address;
                 }
                 else
                 {
+                    // Anything that isn't a comment or an IP address has to be a hostname
                     _hostNames.Add(token);
                 }
             }

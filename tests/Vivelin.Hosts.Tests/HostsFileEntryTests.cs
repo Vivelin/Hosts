@@ -105,5 +105,14 @@ namespace Vivelin.Hosts.Tests
             entry.Enabled.Should().BeFalse();
             entry.HostNames.Should().Equal("localhost", "loopback");
         }
+
+        [Fact]
+        public void TokensInOuterCommentWithoutSpaceAreParsedAsHostNames()
+        {
+            var entry = new HostsFileEntry { Line = "#127.0.0.1 localhost loopback # Comment" };
+
+            entry.Enabled.Should().BeFalse();
+            entry.HostNames.Should().Equal("localhost", "loopback");
+        }
     }
 }
