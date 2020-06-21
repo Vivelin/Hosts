@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
-using System.Text;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Vivelin.Hosts
 {
-    public class HostsFileManager
+    public class HostsFileManager : INotifyPropertyChanged
     {
+        private HostsFile _hostsFile;
+
         public HostsFileManager()
             : this(SystemHostsPath, Path.GetTempFileName())
         {
@@ -29,6 +32,8 @@ namespace Vivelin.Hosts
             TempPath = tempPath;
         }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public static string SystemHostsPath
         {
             get
@@ -38,11 +43,22 @@ namespace Vivelin.Hosts
             }
         }
 
+        public HostsFile HostsFile
+        {
+            get { return _hostsFile; }
+            protected set
+            {
+                if (value != _hostsFile)
+                {
+                    _hostsFile = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public string SourcePath { get; }
 
         public string TempPath { get; }
-
-        public HostsFile HostsFile { get; protected set; }
 
         public async Task LoadAsync(CancellationToken cancellationToken = default)
         {
@@ -58,6 +74,14 @@ namespace Vivelin.Hosts
             await HostsFile.SaveAsync(stream, cancellationToken).ConfigureAwait(false);
 
             File.Copy(TempPath, SourcePath);
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            if (propertyName is null)
+                throw new ArgumentNullException(nameof(propertyName));
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
