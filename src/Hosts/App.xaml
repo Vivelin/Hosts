@@ -2,8 +2,41 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Hosts"
+             xmlns:hosts="clr-namespace:Vivelin.Hosts;assembly=Vivelin.Hosts"
              StartupUri="MainWindow.xaml">
-    <Application.Resources>
-         
-    </Application.Resources>
+  <Application.Resources>
+    <ResourceDictionary>
+      <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+      <DataTemplate x:Key="HostsEntryTemplate" DataType="{x:Type hosts:HostsFileEntry}">
+        <StackPanel Orientation="Horizontal">
+          <CheckBox IsChecked="{Binding Enabled}" 
+                    Visibility="{Binding IsValid, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}"
+                    Margin="4" Padding="0"></CheckBox>
+
+          <Label Content="{Binding Address}" 
+                 Visibility="{Binding IsValid, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}"
+                 Margin="4" Padding="0"></Label>
+
+          <ItemsControl ItemsSource="{Binding HostNames}" 
+                        Visibility="{Binding IsValid, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal"></StackPanel>
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding}" 
+                           Margin="4" 
+                           Padding="0">
+                </TextBlock>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <TextBlock Text="{Binding Comment}" Margin="4" Padding="4"></TextBlock>
+        </StackPanel>
+      </DataTemplate>
+    </ResourceDictionary>
+  </Application.Resources>
 </Application>
