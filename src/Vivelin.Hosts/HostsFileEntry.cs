@@ -9,7 +9,7 @@ namespace Vivelin.Hosts
 {
     public class HostsFileEntry
     {
-        private HostsFileEntry(string line, string comment, IPAddress address, List<string> hostNames, bool enabled)
+        internal HostsFileEntry(string line, string comment, IPAddress address, List<string> hostNames, bool enabled)
         {
             Line = line;
             Comment = comment;
