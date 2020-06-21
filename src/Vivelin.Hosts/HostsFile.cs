@@ -37,8 +37,11 @@ namespace Vivelin.Hosts
             while (line != null && !cancellationToken.IsCancellationRequested)
             {
                 var readTask = reader.ReadLineAsync();
-                var entry = HostsFileEntry.Parse(line);
-                entries.Add(entry);
+                if (!string.IsNullOrEmpty(line))
+                {
+                    var entry = HostsFileEntry.Parse(line);
+                    entries.Add(entry);
+                }
                 line = await readTask.ConfigureAwait(false);
             }
 

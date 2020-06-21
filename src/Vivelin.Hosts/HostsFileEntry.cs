@@ -9,6 +9,9 @@ namespace Vivelin.Hosts
 {
     public class HostsFileEntry
     {
+        private static readonly char[] s_whitespaceChars = new[] { ' ', '\t' };
+        private const char PreferredWhitespaceChar = ' ';
+
         internal HostsFileEntry(string line, string comment, IPAddress address, List<string> hostNames, bool enabled)
         {
             Line = line;
@@ -42,15 +45,16 @@ namespace Vivelin.Hosts
             if (Address != null)
             {
                 builder.Append(Address.ToString());
-                builder.Append(' ');
-                builder.Append(string.Join(' ', HostNames));
+                builder.Append(PreferredWhitespaceChar);
+                builder.Append(string.Join(PreferredWhitespaceChar, HostNames));
             }
 
             if (Comment != null)
             {
                 if (Address != null)
-                    builder.Append(' ');
-                builder.Append("# ");
+                    builder.Append(PreferredWhitespaceChar);
+                builder.Append("#");
+                builder.Append(PreferredWhitespaceChar);
                 builder.Append(Comment);
             }
 
@@ -59,7 +63,7 @@ namespace Vivelin.Hosts
 
         public static HostsFileEntry Parse(string value)
         {
-            var tokens = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var tokens = value.Split(s_whitespaceChars, StringSplitOptions.RemoveEmptyEntries);
             var enabled = true;
             string comment = null;
             IPAddress ipAddress = null;
@@ -70,7 +74,7 @@ namespace Vivelin.Hosts
                 var token = tokens[i].Trim();
                 if (token == "#")
                 {
-                    comment = string.Join(' ', tokens.Skip(i + 1));
+                    comment = string.Join(PreferredWhitespaceChar, tokens.Skip(i + 1));
                     if (!enabled || tokens.Length <= i || !IPAddress.TryParse(tokens[i + 1], out _))
                     {
                         // Stop parsing when we encounter a comment in an already commented-out line
@@ -83,7 +87,7 @@ namespace Vivelin.Hosts
                 }
                 else if (token.StartsWith('#'))
                 {
-                    comment = token.Substring(1) + ' ' + string.Join(' ', tokens.Skip(i + 1));
+                    comment = token.Substring(1) + PreferredWhitespaceChar + string.Join(PreferredWhitespaceChar, tokens.Skip(i + 1));
                     if (!enabled || !IPAddress.TryParse(token.Substring(1), out var address))
                     {
                         // Stop parsing when we encounter a comment in an already commented-out line
